@@ -26,7 +26,6 @@ class Bot(commands.Bot):
 
 
         db.autosave(self.scheduler)
-        report.send_report(self.scheduler)
         super().__init__(command_prefix=config["prefix"], intents=intents)
 
 
@@ -40,6 +39,12 @@ class Bot(commands.Bot):
         print(f"Logged in as {bot.user.name}")
         await bot.change_presence(activity=discord.Game(name = f'{config["prefix"]}help'))
 
+        for guild in self.guilds:
+            db.execute('INSERT OR IGNORE INTO Servers(server_id) VALUES(?)', guild.id)
+            for member in guild:
+                db.execute('INSERT OR IGNORE INTO Users(user_id) VALUES(?)', member.id)
+                db.execute('INSERT OR IGNORE INTO user_in_server(server_id, user_id) VALUES(?,?)', guild.id, member.id)
+            
     async def on_member_join(member):
         if db.get_one('SELECT user_id FROM user_in_server WHERE user_id=? AND server_id=?', member.id, member.guild.id) == None:
             db.execute('INSERT OR IGNORE INTO Users(user_id) VALUES(?)', member.id)
