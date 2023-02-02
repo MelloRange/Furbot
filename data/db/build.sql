@@ -1,10 +1,10 @@
 CREATE TABLE IF NOT EXISTS Servers(
     server_id int NOT NULL UNIQUE,
-    server_name text,
+    server_name text
 );
 
 CREATE TABLE IF NOT EXISTS Users(
-    user_id int NOT NULL UNIQUE,
+    user_id int NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS user_in_server(

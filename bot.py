@@ -3,12 +3,12 @@ from discord.ext import commands
 import json
 import os
 import sys
+import asyncio
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
 from lib.db import db
-from lib.db import report
 
 if not os.path.isfile("config.json"):
     sys.exit("'config.json' not found! Please add it and try again.")
@@ -17,8 +17,7 @@ else:
         config = json.load(file)
 
 
-intents = discord.Intents.default()
-intents.members = True
+intents = discord.Intents.all()
 
 class Bot(commands.Bot):
     def __init__(self):
@@ -41,7 +40,7 @@ class Bot(commands.Bot):
 
         for guild in self.guilds:
             db.execute('INSERT OR IGNORE INTO Servers(server_id) VALUES(?)', guild.id)
-            for member in guild:
+            for member in guild.members:
                 db.execute('INSERT OR IGNORE INTO Users(user_id) VALUES(?)', member.id)
                 db.execute('INSERT OR IGNORE INTO user_in_server(server_id, user_id) VALUES(?,?)', guild.id, member.id)
             
@@ -57,15 +56,20 @@ class Bot(commands.Bot):
 
 bot = Bot()
 
-if __name__ == "__main__":
-    for file in os.listdir(f"./lib/cogs"):
-        if file.endswith(".py"):
-            extension = file[:-3]
+async def load_extensions():
+    for filename in os.listdir("./lib/cogs"):
+        if filename.endswith(".py"):
+            extension = filename[:-3]
             try:
-                bot.load_extension(f"lib.cogs.{extension}")
+                await bot.load_extension(f"lib.cogs.{extension}")
                 print(f"Loaded extension '{extension}'")
             except Exception as e:
                 exception = f"{type(e).__name__}: {e}"
                 print(f"Failed to load extension {extension}\n{exception}")
 
-    bot.run(config["token"])
+async def main():
+    async with bot:
+        await load_extensions()
+        await bot.start(config["token"])
+
+asyncio.run(main())
