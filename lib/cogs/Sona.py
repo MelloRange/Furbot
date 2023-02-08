@@ -13,9 +13,9 @@ class Sona(commands.Cog):
 		"""
 		Saves a text... test function
 		"""
-		db.execute('INSERT INTO fursona_characters(user_id, character_name, description) VALUES(?,?,?)', ctx.message.author.id, char_name, char_description)
+		char_id = db.get_one('INSERT INTO fursona_characters(user_id, character_name, description) VALUES(?,?,?) RETURNING character_id', ctx.message.author.id, char_name, char_description)
 		db.commit()
-		await ctx.send(f'{char_name} has been saved with id {id}')
+		await ctx.send(f'{char_name} has been saved with id {char_id}')
 
 	@commands.command(name="get") 
 	async def get(self, ctx, char_id:int):
