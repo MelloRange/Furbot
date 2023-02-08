@@ -22,15 +22,24 @@ class Gallery(commands.Cog):
 		char_description = db.get_one('SELECT description FROM fursona_characters WHERE character_id=?', char_id)
 		favorited = db.get_one('SELECT favorited FROM fursona_characters WHERE character_id=?', char_id)
 		
-		# Temporary image list, images will be taken from the database once it's set up
-		# These could maybe be arrays/tuples of strings later? With a URL, a description and tags
-		# It'd maybe be like ["url goes here", "description", "tag1,tag2,tag3,tag4..."]
+		
+		# Grabbing the images from the database
 		image_list = []
 		cursor = db.get_column('SELECT art_image FROM character_art WHERE character_id=?',char_id)
 		for row in cursor:
 			image_list.append(row)
+		
+		# Setting the starting image, if no favorite is selected, defaults to the first image
 		current_position = favorited
+		if not current_position:
+			current_position = 0
+		
 		view = View()
+		
+		if not image_list:
+			await ctx.send(f'Character {char_name} has no images!')
+			return
+		
 		
 		#This is the embed that'll contain the images, it'll be edited whenever a new image is requested
 		gallery_embed = discord.Embed(
