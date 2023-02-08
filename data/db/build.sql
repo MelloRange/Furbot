@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS character_art(
     art_id INTEGER PRIMARY KEY AUTOINCREMENT, --incremental
     character_id int NOT NULL,
     description text,
-    art_image blob NOT NULL, --binary encoded image format
+    art_image text NOT NULL, --binary encoded image format
     FOREIGN KEY (character_id) REFERENCES fursona_characters(character_id)
 );
 
